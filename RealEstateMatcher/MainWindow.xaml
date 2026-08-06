@@ -1,0 +1,382 @@
+﻿<Window x:Class="RealEstateMatcher.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="房源管理與買賣配對系統"
+        Width="1440"
+        Height="860"
+        MinWidth="1180"
+        MinHeight="720"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        TextOptions.TextFormattingMode="Display"
+        TextOptions.TextRenderingMode="ClearType"
+        WindowStartupLocation="CenterScreen">
+    <DockPanel>
+        <Border DockPanel.Dock="Top" Padding="26,18">
+            <Border.Background>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#312E81" Offset="0" /><GradientStop Color="#4F46E5" Offset="0.58" /><GradientStop Color="#6366F1" Offset="1" /></LinearGradientBrush>
+            </Border.Background>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel>
+                    <TextBlock Text="房源管理與買賣配對系統"
+                               Foreground="White"
+                               FontSize="26"
+                               FontWeight="Bold" />
+                    <TextBlock Text="集中管理買方需求、房源條件與智慧排序"
+                               Foreground="#C7D2FE"
+                               FontSize="13"
+                               Margin="0,5,0,0" />
+                </StackPanel>
+                <StackPanel Grid.Column="1" HorizontalAlignment="Right" Background="#22FFFFFF" Margin="0,0,0,0">
+                    <TextBlock Text="●  SQLite 資料庫"
+                               Foreground="#E0E7FF"
+                               FontWeight="SemiBold"
+                               Margin="12,8,12,2"
+                               HorizontalAlignment="Right" />
+                    <TextBlock Text="{Binding DatabasePath}"
+                               Foreground="White"
+                               FontSize="11"
+                               Margin="12,0,12,8"
+                               MaxWidth="520"
+                               TextTrimming="CharacterEllipsis" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border DockPanel.Dock="Bottom" Background="White" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0" Padding="16,9">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding StatusMessage}" Foreground="#334155" FontWeight="SemiBold" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1"
+                           Text="未填寫或未勾選的需求條件視為不限"
+                           Foreground="{StaticResource MutedBrush}" />
+            </Grid>
+        </Border>
+
+        <TabControl Margin="16,14,16,12" Padding="0" Style="{StaticResource BrowserTabControlStyle}">
+            <TabItem Header="買方管理" Style="{StaticResource BrowserTabItemStyle}">
+                <Grid Margin="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.35*" />
+                        <ColumnDefinition Width="1.2*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource SectionCardStyle}">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
+                                <TextBlock Text="買方清單" FontSize="20" FontWeight="Bold" VerticalAlignment="Center" />
+                                <Button Content="重新整理" Command="{Binding RefreshCommand}" Margin="16,0,0,0" />
+                            </StackPanel>
+                            <DataGrid ItemsSource="{Binding Buyers}"
+                                      SelectedItem="{Binding SelectedBuyer}"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch"
+                                      IsReadOnly="True">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="姓名" Binding="{Binding Name}" Width="110" />
+                                    <DataGridTextColumn Header="手機" Binding="{Binding Mobile}" Width="125" />
+                                    <DataGridTextColumn Header="價格" Binding="{Binding PriceText}" Width="110" />
+                                    <DataGridTextColumn Header="地址" Binding="{Binding Address}" Width="*" MinWidth="180" />
+                                    <DataGridTextColumn Header="類型" Binding="{Binding HouseTypesText}" Width="150" />
+                                    <DataGridTextColumn Header="房廳衛" Binding="{Binding LayoutsText}" Width="130" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+                    </Border>
+
+                    <Border Grid.Column="1" Style="{StaticResource SectionCardStyle}">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button Content="新增/清空" Command="{Binding NewBuyerCommand}" />
+                                <Button Content="儲存買方" Command="{Binding SaveBuyerCommand}" Style="{StaticResource PrimaryButtonStyle}" />
+                                <Button Content="刪除" Command="{Binding DeleteBuyerCommand}" />
+                            </StackPanel>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel Margin="4">
+                                    <TextBlock Text="買方資料" FontSize="20" FontWeight="Bold" Margin="0,0,0,14" />
+                                    <TextBlock Text="聯絡資料" Style="{StaticResource FormSectionHeaderStyle}" Margin="0,0,0,10" />
+                                    <TextBlock Text="姓名 *" Style="{StaticResource FieldLabelStyle}" />
+                                    <TextBox Text="{Binding BuyerForm.Name, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Text="手機號碼" Style="{StaticResource FieldLabelStyle}" />
+                                    <TextBox Text="{Binding BuyerForm.Mobile, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Text="LINE ID" Style="{StaticResource FieldLabelStyle}" />
+                                    <TextBox Text="{Binding BuyerForm.LineId, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Text="位置與預算" Style="{StaticResource FormSectionHeaderStyle}" />
+                                    <TextBlock Text="價格範圍（萬元；空白代表不限）" Style="{StaticResource FieldLabelStyle}" />
+                                    <UniformGrid Columns="2"><StackPanel Margin="0,0,5,0"><TextBlock Text="下限" /><TextBox Text="{Binding BuyerForm.MinPriceText}" /></StackPanel><StackPanel Margin="5,0,0,0"><TextBlock Text="上限" /><TextBox Text="{Binding BuyerForm.PriceText}" /></StackPanel></UniformGrid>
+                                    <TextBlock Text="希望地址或區域（空白代表不限）" Style="{StaticResource FieldLabelStyle}" />
+                                    <TextBox Text="{Binding BuyerForm.Address, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Text="縣市／行政區（可多選，以逗號分隔）" Style="{StaticResource FieldLabelStyle}" />
+                                    <UniformGrid Columns="2"><StackPanel Margin="0,0,5,0"><TextBlock Text="縣市" /><TextBox Text="{Binding BuyerForm.CitiesText}" /></StackPanel><StackPanel Margin="5,0,0,0"><TextBlock Text="行政區" /><TextBox Text="{Binding BuyerForm.DistrictsText}" /></StackPanel></UniformGrid>
+                                    <TextBlock Text="房屋類型" Style="{StaticResource FormSectionHeaderStyle}" />
+                                    <TextBlock Text="可接受類型（例如：公寓、社區、大樓、電梯大樓；多個項目用逗號分隔）" Style="{StaticResource FieldLabelStyle}" TextWrapping="Wrap" />
+                                    <ItemsControl ItemsSource="{Binding BuyerHouseTypeOptions}">
+                                        <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate><DataTemplate><CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" Margin="0,3,18,3" /></DataTemplate></ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock Text="空間與坪數" Style="{StaticResource FormSectionHeaderStyle}" />
+                                    <TextBlock Text="房／廳／衛浴數量範圍（左欄為下限，右欄為上限）" Style="{StaticResource FieldLabelStyle}" />
+                                    <UniformGrid Columns="3">
+                                        <StackPanel Margin="0,0,5,0"><TextBlock Text="房數 下限／上限" /><UniformGrid Columns="2"><TextBox Text="{Binding BuyerForm.MinBedroomsText}" /><TextBox Text="{Binding BuyerForm.MaxBedroomsText}" /></UniformGrid></StackPanel>
+                                        <StackPanel Margin="5,0"><TextBlock Text="廳數 下限／上限" /><UniformGrid Columns="2"><TextBox Text="{Binding BuyerForm.MinLivingRoomsText}" /><TextBox Text="{Binding BuyerForm.MaxLivingRoomsText}" /></UniformGrid></StackPanel>
+                                        <StackPanel Margin="5,0,0,0"><TextBlock Text="衛浴 下限／上限" /><UniformGrid Columns="2"><TextBox Text="{Binding BuyerForm.MinBathroomsText}" /><TextBox Text="{Binding BuyerForm.MaxBathroomsText}" /></UniformGrid></StackPanel>
+                                    </UniformGrid>
+                                    <TextBlock Text="坪數範圍" Style="{StaticResource FieldLabelStyle}" />
+                                    <UniformGrid Columns="2"><StackPanel Margin="0,0,5,0"><TextBlock Text="主建物 下限／上限" /><UniformGrid Columns="2"><TextBox Text="{Binding BuyerForm.MinMainAreaText}" /><TextBox Text="{Binding BuyerForm.MaxMainAreaText}" /></UniformGrid></StackPanel><StackPanel Margin="5,0,0,0"><TextBlock Text="權狀 下限／上限" /><UniformGrid Columns="2"><TextBox Text="{Binding BuyerForm.MinDeedAreaText}" /><TextBox Text="{Binding BuyerForm.MaxDeedAreaText}" /></UniformGrid></StackPanel></UniformGrid>
+                                    <TextBlock Text="樓層與車位" Style="{StaticResource FormSectionHeaderStyle}" />
+                                    <TextBlock Text="樓層、總樓層與屋齡範圍（左欄為下限，右欄為上限）" Style="{StaticResource FieldLabelStyle}" />
+                                    <UniformGrid Columns="3"><StackPanel Margin="0,0,5,0"><TextBlock Text="樓層 下限／上限" /><UniformGrid Columns="2"><TextBox Text="{Binding BuyerForm.MinFloorText}" /><TextBox Text="{Binding BuyerForm.MaxFloorText}" /></UniformGrid></StackPanel><StackPanel Margin="5,0"><TextBlock Text="總樓層 下限／上限" /><UniformGrid Columns="2"><TextBox Text="{Binding BuyerForm.MinTotalFloorsText}" /><TextBox Text="{Binding BuyerForm.MaxTotalFloorsText}" /></UniformGrid></StackPanel><StackPanel Margin="5,0,0,0"><TextBlock Text="屋齡 下限／上限" /><UniformGrid Columns="2"><TextBox Text="{Binding BuyerForm.MinBuildingAgeText}" /><TextBox Text="{Binding BuyerForm.MaxBuildingAgeText}" /></UniformGrid></StackPanel></UniformGrid>
+                                    <TextBlock Text="車位" Style="{StaticResource FieldLabelStyle}" />
+                                    <UniformGrid Columns="2"><StackPanel Margin="0,0,5,0"><TextBlock Text="可接受類型（多選）" /><TextBox Text="{Binding BuyerForm.ParkingTypesText}" /></StackPanel><StackPanel Margin="5,0,0,0"><TextBlock Text="最少數量" /><TextBox Text="{Binding BuyerForm.MinParkingCountText}" /></StackPanel></UniformGrid>
+                                    <TextBlock Text="生活條件" Style="{StaticResource FormSectionHeaderStyle}" />
+                                    <TextBlock Text="朝向／裝潢狀態（可多選）" Style="{StaticResource FieldLabelStyle}" />
+                                    <UniformGrid Columns="2"><StackPanel Margin="0,0,5,0"><TextBlock Text="可接受朝向" Style="{StaticResource SubFieldLabelStyle}"/><TextBox Text="{Binding BuyerForm.OrientationsText}" /></StackPanel><StackPanel Margin="5,0,0,0"><TextBlock Text="可接受裝潢狀態" Style="{StaticResource SubFieldLabelStyle}"/><TextBox Text="{Binding BuyerForm.DecorationStatusesText}" /></StackPanel></UniformGrid>
+                                    <TextBlock Text="寵物／電梯需求" Style="{StaticResource FieldLabelStyle}" />
+                                    <UniformGrid Columns="2"><StackPanel Margin="0,0,5,0"><TextBlock Text="寵物" Style="{StaticResource SubFieldLabelStyle}"/><ComboBox ItemsSource="{Binding BuyerRequirementChoices}" DisplayMemberPath="Name" SelectedValuePath="Value" SelectedValue="{Binding BuyerForm.PetRequirement}" /></StackPanel><StackPanel Margin="5,0,0,0"><TextBlock Text="電梯" Style="{StaticResource SubFieldLabelStyle}"/><ComboBox ItemsSource="{Binding BuyerRequirementChoices}" DisplayMemberPath="Name" SelectedValuePath="Value" SelectedValue="{Binding BuyerForm.ElevatorRequirement}" /></StackPanel></UniformGrid>
+                                    <TextBlock Text="學區／交通需求（可多選）" Style="{StaticResource FieldLabelStyle}" />
+                                    <UniformGrid Columns="2"><StackPanel Margin="0,0,5,0"><TextBlock Text="學區或學校" Style="{StaticResource SubFieldLabelStyle}"/><TextBox Text="{Binding BuyerForm.SchoolsText}" /></StackPanel><StackPanel Margin="5,0,0,0"><TextBlock Text="交通站點或需求" Style="{StaticResource SubFieldLabelStyle}"/><TextBox Text="{Binding BuyerForm.TransportText}" /></StackPanel></UniformGrid>
+                                    <TextBlock Text="排除條件與備註" Style="{StaticResource FormSectionHeaderStyle}" />
+                                    <TextBlock Text="排除條件" Style="{StaticResource FieldLabelStyle}" /><TextBox Text="{Binding BuyerForm.ExclusionNotes}" AcceptsReturn="True" Height="55" />
+                                    <TextBlock Text="其他備註" Style="{StaticResource FieldLabelStyle}" />
+                                    <TextBox Text="{Binding BuyerForm.Note, UpdateSourceTrigger=PropertyChanged}"
+                                             Height="100"
+                                             AcceptsReturn="True"
+                                             VerticalScrollBarVisibility="Auto" />
+                                </StackPanel>
+                            </ScrollViewer>
+                        </DockPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="賣方房源管理" Style="{StaticResource BrowserTabItemStyle}">
+                <Grid Margin="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="1.35*" />
+                        <ColumnDefinition Width="1.2*" />
+                    </Grid.ColumnDefinitions>
+
+                    <Border Grid.Column="0" Style="{StaticResource SectionCardStyle}">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,10">
+                                <TextBlock Text="賣方房源清單" FontSize="20" FontWeight="Bold" VerticalAlignment="Center" />
+                                <Button Content="重新整理" Command="{Binding RefreshCommand}" Margin="16,0,0,0" />
+                            </StackPanel>
+                            <DataGrid ItemsSource="{Binding Sellers}"
+                                      SelectedItem="{Binding SelectedSeller}"
+                                      HorizontalAlignment="Stretch"
+                                      VerticalAlignment="Stretch"
+                                      IsReadOnly="True">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="姓名" Binding="{Binding Name}" Width="110" />
+                                    <DataGridTextColumn Header="手機" Binding="{Binding Mobile}" Width="125" />
+                                    <DataGridTextColumn Header="價格" Binding="{Binding PriceText}" Width="110" />
+                                    <DataGridTextColumn Header="地址" Binding="{Binding Address}" Width="*" MinWidth="180" />
+                                    <DataGridTextColumn Header="類型" Binding="{Binding HouseTypesText}" Width="150" />
+                                    <DataGridTextColumn Header="房廳衛" Binding="{Binding LayoutsText}" Width="130" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </DockPanel>
+                    </Border>
+
+                    <Border Grid.Column="1" Style="{StaticResource SectionCardStyle}">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button Content="新增/清空" Command="{Binding NewSellerCommand}" />
+                                <Button Content="儲存房源" Command="{Binding SaveSellerCommand}" Style="{StaticResource PrimaryButtonStyle}" />
+                                <Button Content="刪除" Command="{Binding DeleteSellerCommand}" />
+                            </StackPanel>
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel Margin="4">
+                                    <TextBlock Text="賣方與房源資料" FontSize="20" FontWeight="Bold" Margin="0,0,0,14" />
+                                    <TextBlock Text="聯絡資料" Style="{StaticResource FormSectionHeaderStyle}" Margin="0,0,0,10" />
+                                    <TextBlock Text="姓名 *" Style="{StaticResource FieldLabelStyle}" />
+                                    <TextBox Text="{Binding SellerForm.Name, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Text="手機號碼" Style="{StaticResource FieldLabelStyle}" />
+                                    <TextBox Text="{Binding SellerForm.Mobile, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Text="LINE ID" Style="{StaticResource FieldLabelStyle}" />
+                                    <TextBox Text="{Binding SellerForm.LineId, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Text="位置與價格" Style="{StaticResource FormSectionHeaderStyle}" />
+                                    <TextBlock Text="房源開價（萬元；空白代表未定）" Style="{StaticResource FieldLabelStyle}" />
+                                    <TextBox Text="{Binding SellerForm.PriceText, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Text="房源地址（空白代表不限/未定）" Style="{StaticResource FieldLabelStyle}" />
+                                    <TextBox Text="{Binding SellerForm.Address, UpdateSourceTrigger=PropertyChanged}" />
+                                    <TextBlock Text="縣市／行政區" Style="{StaticResource FieldLabelStyle}" /><UniformGrid Columns="2"><TextBox Margin="0,0,5,0" Text="{Binding SellerForm.CitiesText}" /><TextBox Margin="5,0,0,0" Text="{Binding SellerForm.DistrictsText}" /></UniformGrid>
+                                    <TextBlock Text="房屋類型" Style="{StaticResource FormSectionHeaderStyle}" />
+                                    <TextBlock Text="類型（例如：公寓、社區、大樓、電梯大樓）" Style="{StaticResource FieldLabelStyle}" TextWrapping="Wrap" />
+                                    <ItemsControl ItemsSource="{Binding SellerHouseTypeOptions}">
+                                        <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate><DataTemplate><CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" Margin="0,3,18,3" /></DataTemplate></ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock Text="房廳衛組合（可多選；空白代表不限）" Style="{StaticResource FieldLabelStyle}" />
+                                    <ItemsControl ItemsSource="{Binding SellerLayoutOptions}">
+                                        <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                                        <ItemsControl.ItemTemplate><DataTemplate><CheckBox Content="{Binding Name}" IsChecked="{Binding IsSelected}" Margin="0,3,18,3" /></DataTemplate></ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                    <TextBlock Text="空間與坪數" Style="{StaticResource FormSectionHeaderStyle}" />
+                                    <UniformGrid Columns="3"><StackPanel Margin="0,0,5,0"><TextBlock Text="房數（間）" Style="{StaticResource SubFieldLabelStyle}"/><TextBox Text="{Binding SellerForm.MinBedroomsText}" /></StackPanel><StackPanel Margin="5,0"><TextBlock Text="廳數（間）" Style="{StaticResource SubFieldLabelStyle}"/><TextBox Text="{Binding SellerForm.MinLivingRoomsText}" /></StackPanel><StackPanel Margin="5,0,0,0"><TextBlock Text="衛浴數（間）" Style="{StaticResource SubFieldLabelStyle}"/><TextBox Text="{Binding SellerForm.MinBathroomsText}" /></StackPanel></UniformGrid>
+                                    <UniformGrid Columns="2"><StackPanel Margin="0,0,5,0"><TextBlock Text="主建物坪數（坪）" Style="{StaticResource SubFieldLabelStyle}"/><TextBox Text="{Binding SellerForm.MinMainAreaText}" /></StackPanel><StackPanel Margin="5,0,0,0"><TextBlock Text="權狀坪數（坪）" Style="{StaticResource SubFieldLabelStyle}"/><TextBox Text="{Binding SellerForm.MinDeedAreaText}" /></StackPanel></UniformGrid>
+                                    <TextBlock Text="樓層與車位" Style="{StaticResource FormSectionHeaderStyle}" />
+                                    <UniformGrid Columns="3"><StackPanel Margin="0,0,5,0"><TextBlock Text="所在樓層" Style="{StaticResource SubFieldLabelStyle}"/><TextBox Text="{Binding SellerForm.MinFloorText}" /></StackPanel><StackPanel Margin="5,0"><TextBlock Text="建物總樓層" Style="{StaticResource SubFieldLabelStyle}"/><TextBox Text="{Binding SellerForm.MinTotalFloorsText}" /></StackPanel><StackPanel Margin="5,0,0,0"><TextBlock Text="屋齡（年）" Style="{StaticResource SubFieldLabelStyle}"/><TextBox Text="{Binding SellerForm.MinBuildingAgeText}" /></StackPanel></UniformGrid>
+                                    <UniformGrid Columns="2"><StackPanel Margin="0,0,5,0"><TextBlock Text="車位類型" Style="{StaticResource SubFieldLabelStyle}"/><TextBox Text="{Binding SellerForm.ParkingTypesText}" /></StackPanel><StackPanel Margin="5,0,0,0"><TextBlock Text="車位數量" Style="{StaticResource SubFieldLabelStyle}"/><TextBox Text="{Binding SellerForm.MinParkingCountText}" /></StackPanel></UniformGrid>
+                                    <TextBlock Text="生活條件" Style="{StaticResource FormSectionHeaderStyle}" />
+                                    <UniformGrid Columns="2"><StackPanel Margin="0,0,5,0"><TextBlock Text="朝向" Style="{StaticResource SubFieldLabelStyle}"/><TextBox Text="{Binding SellerForm.OrientationsText}" /></StackPanel><StackPanel Margin="5,0,0,0"><TextBlock Text="裝潢狀態" Style="{StaticResource SubFieldLabelStyle}"/><TextBox Text="{Binding SellerForm.DecorationStatusesText}" /></StackPanel></UniformGrid>
+                                    <UniformGrid Columns="2"><StackPanel Margin="0,0,5,0"><TextBlock Text="是否允許寵物" Style="{StaticResource SubFieldLabelStyle}"/><ComboBox ItemsSource="{Binding SellerAvailabilityChoices}" DisplayMemberPath="Name" SelectedValuePath="Value" SelectedValue="{Binding SellerForm.PetRequirement}" /></StackPanel><StackPanel Margin="5,0,0,0"><TextBlock Text="是否有電梯" Style="{StaticResource SubFieldLabelStyle}"/><ComboBox ItemsSource="{Binding SellerAvailabilityChoices}" DisplayMemberPath="Name" SelectedValuePath="Value" SelectedValue="{Binding SellerForm.ElevatorRequirement}" /></StackPanel></UniformGrid>
+                                    <UniformGrid Columns="2"><StackPanel Margin="0,0,5,0"><TextBlock Text="所屬學區或學校" Style="{StaticResource SubFieldLabelStyle}"/><TextBox Text="{Binding SellerForm.SchoolsText}" /></StackPanel><StackPanel Margin="5,0,0,0"><TextBlock Text="鄰近交通站點" Style="{StaticResource SubFieldLabelStyle}"/><TextBox Text="{Binding SellerForm.TransportText}" /></StackPanel></UniformGrid>
+                                    <TextBlock Text="限制條件與備註" Style="{StaticResource FormSectionHeaderStyle}" />
+                                    <TextBlock Text="排除或限制條件" Style="{StaticResource FieldLabelStyle}" /><TextBox Text="{Binding SellerForm.ExclusionNotes}" AcceptsReturn="True" Height="55" />
+                                    <TextBlock Text="其他備註" Style="{StaticResource FieldLabelStyle}" />
+                                    <TextBox Text="{Binding SellerForm.Note, UpdateSourceTrigger=PropertyChanged}"
+                                             Height="100"
+                                             AcceptsReturn="True"
+                                             VerticalScrollBarVisibility="Auto" />
+                                </StackPanel>
+                            </ScrollViewer>
+                        </DockPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="類型管理" Style="{StaticResource BrowserTabItemStyle}">
+                <Grid Margin="8">
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="2*" /><ColumnDefinition Width="3*" /></Grid.ColumnDefinitions>
+                    <Border Style="{StaticResource SectionCardStyle}" Margin="0,0,8,0">
+                        <DockPanel>
+                            <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                                <Button Content="新增" Command="{Binding NewHouseTypeCommand}" />
+                                <Button Content="移除" Command="{Binding DeleteHouseTypeCommand}" />
+                            </StackPanel>
+                            <ListBox ItemsSource="{Binding HouseTypeItems}" SelectedItem="{Binding SelectedHouseType}" DisplayMemberPath="Name" />
+                        </DockPanel>
+                    </Border>
+                    <Border Grid.Column="1" Style="{StaticResource SectionCardStyle}" Margin="8,0,0,0">
+                        <StackPanel>
+                            <TextBlock Text="建立或更新房屋類型" FontSize="20" FontWeight="Bold" Margin="0,0,0,14" />
+                            <TextBlock Text="類型名稱" Style="{StaticResource FieldLabelStyle}" />
+                            <TextBox Text="{Binding HouseTypeName, UpdateSourceTrigger=PropertyChanged}" />
+                            <TextBlock Text="例如：公寓、社區、大樓、電梯大樓、華廈、透天厝" Foreground="{StaticResource MutedBrush}" TextWrapping="Wrap" />
+                            <Button Content="儲存類型" Command="{Binding SaveHouseTypeCommand}" Style="{StaticResource PrimaryButtonStyle}" HorizontalAlignment="Left" Margin="0,16,0,0" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="自動配對" Style="{StaticResource BrowserTabItemStyle}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="8">
+                        <Border Style="{StaticResource SectionCardStyle}" Margin="0,8,0,0">
+                            <StackPanel>
+                                <TextBlock Text="選擇比對條件" FontSize="20" FontWeight="Bold" />
+                                <TextBlock Margin="0,7,0,10"
+                                           Foreground="{StaticResource MutedBrush}"
+                                           TextWrapping="Wrap"
+                                           Text="只依選擇的項目計算總分，不會因單一條件不符而排除；符合程度越高的資料會排在越前面。" />
+                                <UniformGrid Columns="4">
+                                    <StackPanel Margin="0,0,9,0">
+                                        <TextBlock Text="第一順位" Style="{StaticResource FieldLabelStyle}" />
+                                        <ComboBox ItemsSource="{Binding FirstCriterionOptions}" DisplayMemberPath="Name" SelectedItem="{Binding FirstCriterion}" />
+                                    </StackPanel>
+                                    <StackPanel Margin="3,0,6,0">
+                                        <TextBlock Text="第二順位" Style="{StaticResource FieldLabelStyle}" />
+                                        <ComboBox ItemsSource="{Binding SecondCriterionOptions}" DisplayMemberPath="Name" SelectedItem="{Binding SecondCriterion}" />
+                                    </StackPanel>
+                                    <StackPanel Margin="6,0,3,0">
+                                        <TextBlock Text="第三順位" Style="{StaticResource FieldLabelStyle}" />
+                                        <ComboBox ItemsSource="{Binding ThirdCriterionOptions}" DisplayMemberPath="Name" SelectedItem="{Binding ThirdCriterion}" />
+                                    </StackPanel>
+                                    <StackPanel Margin="9,0,0,0">
+                                        <TextBlock Text="第四順位" Style="{StaticResource FieldLabelStyle}" />
+                                        <ComboBox ItemsSource="{Binding FourthCriterionOptions}" DisplayMemberPath="Name" SelectedItem="{Binding FourthCriterion}" />
+                                    </StackPanel>
+                                </UniformGrid>
+                            </StackPanel>
+                        </Border>
+
+                        <TabControl Margin="8,4,8,8" Height="390">
+                            <TabItem Header="依買方找房源">
+                        <Border Style="{StaticResource SectionCardStyle}" Margin="0,8,0,0">
+                            <DockPanel>
+                                <StackPanel DockPanel.Dock="Top">
+                                    <TextBlock Text="依買方尋找合適賣方房源" FontSize="20" FontWeight="Bold" />
+                                    <StackPanel Orientation="Horizontal" Margin="0,10,0,10">
+                                        <ComboBox Width="380"
+                                                  ItemsSource="{Binding Buyers}"
+                                                  SelectedItem="{Binding SelectedMatchBuyer}"
+                                                  DisplayMemberPath="DisplayName" />
+                                        <Button Content="開始配對"
+                                                Command="{Binding MatchSellersCommand}"
+                                                Style="{StaticResource PrimaryButtonStyle}"
+                                                VerticalAlignment="Top" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <DataGrid ItemsSource="{Binding SellerMatches}" IsReadOnly="True" Height="255" HorizontalAlignment="Stretch">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="總分" Binding="{Binding TotalScoreText}" Width="75" />
+                                        <DataGridTextColumn Header="地址相似度" Binding="{Binding AddressSimilarityText}" Width="100" />
+                                        <DataGridTextColumn Header="價格分" Binding="{Binding PriceScoreText}" Width="70" />
+                                        <DataGridTextColumn Header="房型分" Binding="{Binding HouseTypeScoreText}" Width="70" />
+                                        <DataGridTextColumn Header="房分" Binding="{Binding BedroomScoreText}" Width="60" />
+                                        <DataGridTextColumn Header="廳分" Binding="{Binding LivingRoomScoreText}" Width="60" />
+                                        <DataGridTextColumn Header="衛分" Binding="{Binding BathroomScoreText}" Width="60" />
+                                        <DataGridTextColumn Header="賣方" Binding="{Binding Name}" Width="110" />
+                                        <DataGridTextColumn Header="開價" Binding="{Binding PriceText}" Width="110" />
+                                        <DataGridTextColumn Header="地址" Binding="{Binding Address}" Width="*" MinWidth="220" />
+                                        <DataGridTextColumn Header="房型" Binding="{Binding HouseTypesText}" Width="150" />
+                                        <DataGridTextColumn Header="格局" Binding="{Binding LayoutsText}" Width="130" />
+                                        <DataGridTextColumn Header="聯絡方式" Binding="{Binding ContactText}" Width="190" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </DockPanel>
+                        </Border>
+                            </TabItem>
+
+                            <TabItem Header="依賣方找買方">
+                        <Border Style="{StaticResource SectionCardStyle}" Margin="0,8,0,0">
+                            <DockPanel>
+                                <StackPanel DockPanel.Dock="Top">
+                                    <TextBlock Text="依賣方房源尋找合適買方" FontSize="20" FontWeight="Bold" />
+                                    <StackPanel Orientation="Horizontal" Margin="0,10,0,10">
+                                        <ComboBox Width="380"
+                                                  ItemsSource="{Binding Sellers}"
+                                                  SelectedItem="{Binding SelectedMatchSeller}"
+                                                  DisplayMemberPath="DisplayName" />
+                                        <Button Content="開始配對"
+                                                Command="{Binding MatchBuyersCommand}"
+                                                Style="{StaticResource PrimaryButtonStyle}"
+                                                VerticalAlignment="Top" />
+                                    </StackPanel>
+                                </StackPanel>
+                                <DataGrid ItemsSource="{Binding BuyerMatches}" IsReadOnly="True" Height="255" HorizontalAlignment="Stretch">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="總分" Binding="{Binding TotalScoreText}" Width="75" />
+                                        <DataGridTextColumn Header="地址相似度" Binding="{Binding AddressSimilarityText}" Width="100" />
+                                        <DataGridTextColumn Header="價格分" Binding="{Binding PriceScoreText}" Width="70" />
+                                        <DataGridTextColumn Header="房型分" Binding="{Binding HouseTypeScoreText}" Width="70" />
+                                        <DataGridTextColumn Header="房分" Binding="{Binding BedroomScoreText}" Width="60" />
+                                        <DataGridTextColumn Header="廳分" Binding="{Binding LivingRoomScoreText}" Width="60" />
+                                        <DataGridTextColumn Header="衛分" Binding="{Binding BathroomScoreText}" Width="60" />
+                                        <DataGridTextColumn Header="買方" Binding="{Binding Name}" Width="110" />
+                                        <DataGridTextColumn Header="最高預算" Binding="{Binding PriceText}" Width="110" />
+                                        <DataGridTextColumn Header="希望地址" Binding="{Binding Address}" Width="*" MinWidth="220" />
+                                        <DataGridTextColumn Header="房型" Binding="{Binding HouseTypesText}" Width="150" />
+                                        <DataGridTextColumn Header="格局" Binding="{Binding LayoutsText}" Width="130" />
+                                        <DataGridTextColumn Header="聯絡方式" Binding="{Binding ContactText}" Width="190" />
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </DockPanel>
+                        </Border>
+                            </TabItem>
+                        </TabControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+    </DockPanel>
+</Window>
